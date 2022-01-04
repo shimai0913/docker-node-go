@@ -1,0 +1,38 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    container_name: node_container
+    volumes:
+    - ./src/frontend:/app
+    ports:
+      - 3000:3000
+    # command: sh -c "cd /app/test_app && yarn start"
+    tty: true
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/golang/Dockerfile
+    container_name: go_container
+    volumes:
+    - ./src/backend:/app
+    ports:
+      - 8000:8000
+    # command: sh -c "go run main.go"
+    tty: true
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    container_name: nginx_container
+    ports:
+      - 80:80
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./src:/src
+      - ./nginx_log/:/var/log/nginx
