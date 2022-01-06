@@ -20,9 +20,18 @@ services:
     volumes:
     - ./src/backend:/app
     ports:
-      - 8000:8000
+      - 8080:8080
     # command: sh -c "go run main.go"
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=test_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
     tty: true
+    depends_on:
+      - "db"
 
   nginx:
     build:
@@ -36,3 +45,22 @@ services:
     volumes:
       - ./src:/src
       - ./nginx_log/:/var/log/nginx
+
+  db:
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+    container_name: db_container
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - mysql-volume:/var/lib/mysql
+
+volumes:
+  mysql-volume:
