@@ -1,3 +1,4 @@
 src/
 nginx_log/
 .DS_store
+.env

@@ -1,4 +1,6 @@
 version: '3'
+volumes:
+  mysql-volume:
 services:
   frontend:
     build:
@@ -8,7 +10,7 @@ services:
     volumes:
     - ./src/frontend:/app
     ports:
-      - 3000:3000
+      - ${FRONTEND_APP_PORT}:3000
     # command: sh -c "cd /app/test_app && yarn start"
     tty: true
 
@@ -20,15 +22,15 @@ services:
     volumes:
     - ./src/backend:/app
     ports:
-      - 8080:8080
+      - ${BACKEND_APP_PORT}:8080
     # command: sh -c "go run main.go"
     environment:
       - DB_CONNECTION=mysql
       - DB_HOST=db
-      - DB_PORT=3306
+      - DB_PORT=${DB_PORT}
       - DB_DATABASE=test_db
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
+      - DB_USERNAME=test_db
+      - DB_PASSWORD=test_db
     tty: true
     depends_on:
       - db
@@ -39,7 +41,7 @@ services:
       dockerfile: ./docker/nginx/Dockerfile
     container_name: nginx_container
     ports:
-      - 80:80
+      - ${WEB_PORT}:80
     environment:
       - TZ=Asia/Tokyo
     volumes:
@@ -52,34 +54,27 @@ services:
       dockerfile: ./docker/mysql/Dockerfile
     container_name: db_container
     ports:
-      - 3306:3306
-    restart: on-failure
+      - ${DB_PORT}:3306
     environment:
-      MYSQL_DATABASE: test_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: user
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       TZ: 'Asia/Tokyo'
     volumes:
       - mysql-volume:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: php_my_admin_container
-    restart: on-failure
+    container_name: pma_container
     environment:
       - PMA_ARBITRARY=1
       - PMA_HOST=db
-      - PMA_USER=root
-      - PMA_PASSWORD=root
-    depends_on:
-      - db
+      - PMA_USER=${PMA_USER}
+      - PMA_PASSWORD=${PMA_PASSWORD}
     links:
       - db
     ports:
-      - 8000:80
+      - ${PHP_MY_ADMIN_PORT}:80
     volumes:
       - ./phpmyadmin/sessions:/sessions
-
-volumes:
-  mysql-volume:
