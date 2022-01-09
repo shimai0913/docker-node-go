@@ -31,7 +31,7 @@ services:
       - DB_PASSWORD=root
     tty: true
     depends_on:
-      - "db"
+      - db
 
   nginx:
     build:
@@ -53,14 +53,33 @@ services:
     container_name: db_container
     ports:
       - 3306:3306
+    restart: on-failure
     environment:
       MYSQL_DATABASE: test_db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
       MYSQL_ROOT_PASSWORD: root
       TZ: 'Asia/Tokyo'
     volumes:
       - mysql-volume:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: php_my_admin_container
+    restart: on-failure
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    depends_on:
+      - db
+    links:
+      - db
+    ports:
+      - 8000:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
 
 volumes:
   mysql-volume:
